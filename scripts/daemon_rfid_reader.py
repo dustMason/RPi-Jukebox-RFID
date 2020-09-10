@@ -26,30 +26,23 @@ same_id_delay = 0
 previous_id = ""
 previous_time = time.time()
 
+continuous_play_timeout = 2
+
+
 while True:
-    # reading the card id
-    # NOTE: it's been reported that KKMOON Reader might need the following line altered.
-    # Instead of:
-    # cardid = reader.reader.readCard()
-    # change the line to:
-    # cardid = reader.readCard()
-    # See here for (German ;) details:
-    # https://github.com/MiczFlor/RPi-Jukebox-RFID/issues/551
     cardid = reader.reader.readCard()
     try:
-        # start the player script and pass on the cardid (but only if new card or otherwise
-        # "same_id_delay" seconds have passed)
         if cardid is not None:
-            if cardid != previous_id or (time.time() - previous_time) >= same_id_delay:
+            if cardid == previous_id and (time.time() - previous_time) <= continuous_play_timeout:
+                previous_time = time.time()
+            elif cardid == 'x' and previous_id != 'x':
+                previous_id = cardid
+                subprocess.call([dir_path + '/playout_controls.sh -c=playerstop'], shell=True)
+            elif cardid != previous_id: # or (time.time() - previous_time) >= same_id_delay:
                 logger.info('Trigger Play Cardid={cardid}'.format(cardid=cardid))
                 subprocess.call([dir_path + '/rfid_trigger_play.sh --cardid=' + cardid], shell=True)
                 previous_id = cardid
                 previous_time = time.time()
-            else:
-                logger.debug('Ignoring Card id {cardid} due to same-card-delay, delay: {same_id_delay}'.format(
-                    cardid=cardid,
-                    same_id_delay=same_id_delay
-                ))
 
     except OSError as e:
         logger.error('Execution failed: {e}'.format(e=e))

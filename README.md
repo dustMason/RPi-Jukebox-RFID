@@ -1,3 +1,12 @@
+# Fork Notes
+
+This modifies the vanilla phoniebox code in two ways:
+
+- Uses Adafruit's CircuitPython library to connect SPI to a [cheap PN532 breakout board](https://www.aliexpress.com/item/4000714020751.html?spm=a2g0s.12269583.0.0.5fe83aa3wiBqOc) I ordered on Aliexpress. I originally attempted to use the included i2c implementation but found the setup to be unreliable. Using the SPI bus has worked better for me.
+- Uses the "passive" scanning mode of the pn532 lib to prevent the `readCard` call from blocking. This means that the phoniebox behaves more like a record player and less like a card reader – you can leave an RFID tag sitting on the device and the associated song will play. As soon as you remove the tag, the `stop` command is sent.
+
+---
+
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/MiczFlor/RPi-Jukebox-RFID/develop)
 
 ![Python Tests](https://github.com/MiczFlor/RPi-Jukebox-RFID/workflows/Python%20package/badge.svg) ![Install Script Tests](https://github.com/MiczFlor/RPi-Jukebox-RFID/workflows/Docker%20Test%20Installation/badge.svg) 
